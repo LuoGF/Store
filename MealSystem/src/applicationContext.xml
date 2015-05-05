@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+	http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName"
+			value="com.microsoft.sqlserver.jdbc.SQLServerDriver">
+		</property>
+		<property name="url"
+			value="jdbc:sqlserver://localhost:1433;DatabaseName=Meal">
+		</property>
+		<property name="username" value="sa"></property>
+		<property name="password" value="12345"></property>
+	</bean>
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.SQLServerDialect
+				</prop>
+			</props>
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>com/restrant/entity/User.hbm.xml</value>
+				<value>com/restrant/entity/Admin.hbm.xml</value>
+				<value>com/restrant/entity/Mealseries.hbm.xml</value>
+				<value>com/restrant/entity/Meal.hbm.xml</value>
+				<value>com/restrant/entity/Orders.hbm.xml</value>
+				<value>com/restrant/entity/Orderdts.hbm.xml</value></list>
+		</property></bean>
+	<!-- 定义事务管理器（声明式的事务） -->
+     <bean id="transactionManager"
+      class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+           <property name="sessionFactory">
+           <ref local="sessionFactory" />
+      </property>
+     </bean>
+     <!--主要的事务 advice 声明事务的相关属性-->
+  <tx:advice id="txAdvice" transaction-manager="transactionManager">
+    <tx:attributes>
+      <tx:method name="*" propagation="REQUIRED"/>
+    </tx:attributes>
+  </tx:advice>
+  <aop:config>
+   <!-- 这定义了主要的切面，也就是那些接口可以使用事务,这里只是说执行ProductService的所有方法-->
+    <aop:pointcut id="bizMethods" expression="execution(* com.restrant.biz.*.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="bizMethods" />
+  </aop:config>
+  <!-- 定义mealdaoimpl类 -->
+  <bean id="mealDao" class="com.restrant.dao.impl.MealDaoImpl">
+  <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
+  <!-- 定义userdaoimpl类 -->
+  <bean id="userDao" class="com.restrant.dao.impl.UserDaoImpl">
+  <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+ 
+  <!-- 定义MealseriesDaoimpl类 -->
+  <bean id="mealseriesDao" class="com.restrant.dao.impl.MealseriesDaoImpl">
+  <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+  
+  <!-- 定义MealBizImpl类并为其mealdao属性注入值 -->
+  <bean id="mealBiz" class="com.restrant.biz.impl.MealBizImpl">
+  <property name="mealDao" ref="mealDao"/>
+  </bean>
+  <!-- 定义UserBizImpl类并为其userDao属性注入值 -->
+  <bean id="userBiz" class="com.restrant.biz.impl.UserBizImpl">
+  <property name="userDao" ref="userDao"/>
+  </bean>
+  
+  <!-- 定义MealSeriesBizImpl类并为其mealseriesDao属性注入值 -->
+  <bean id="mealSeriesBiz" class="com.restrant.biz.impl.MealSeriesBizImpl">
+  <property name="mealseriesDao" ref="mealseriesDao"/>
+  </bean>
+  
+  <!-- 定义Mealaction 并为其中属性mealbIZ和mealSeriesBiz注入值 -->
+  <bean name="mealAction" class="com.restrant.action.MealAction"
+  scope="prototype">
+  <property name="mealBiz" ref="mealBiz"/>
+  <property name="mealSeriesBiz" ref="mealSeriesBiz"/>
+  </bean>
+ <!-- 定义菜系列表的action并为其中属性mealSeriesBiz注入值 -->
+  <bean name="mealseriesList" class="com.restrant.action.MealAction"
+  scope="prototype">
+  <property name="mealSeriesBiz" ref="mealSeriesBiz"/>
+  </bean>
+  <!-- 定义用户登录的action并为其中属性mealSeriesBiz注入值 -->
+  <bean name="userAction" class="com.restrant.action.UserAction"
+  scope="prototype">
+  <property name="userBiz" ref="userBiz"/>
+  </bean>
+	</beans>

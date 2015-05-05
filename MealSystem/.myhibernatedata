@@ -1,0 +1,24 @@
+#MyEclipse Hibernate Properties
+#Sun May 03 21:23:18 CST 2015
+sessionFactoryName=com.restrant.entity.HibernateSessionFactory
+genBasicCompId=false
+profile=
+daoSFId=
+version=3.3
+jndiPath=
+detectM2M=false
+reStrategyClass=
+detectO2O=false
+springDaoFile=
+useJavaTypes=true
+keyGenerator=native
+libInstallFolder=/WebRoot/WEB-INF/lib
+addLibs2Project=true
+genVersionTag=false
+sessionFactoryId=sessionFactory
+basePersistenceClass=
+genAnnotations=false
+reSettingsFile=/MealSystem/hibernate.reveng.xml
+configFile=/MealSystem/src/applicationContext.xml
+createConfigFile=false
+addLibs2Classpath=true
